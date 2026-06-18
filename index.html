@@ -11,6 +11,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236a3093'/%3E%3Cstop offset='1' stop-color='%231c92d2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Ccircle cx='38' cy='38' r='22' fill='white' fill-opacity='0.35'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236a3093'/%3E%3Cstop offset='1' stop-color='%231c92d2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Ccircle cx='38' cy='38' r='22' fill='white' fill-opacity='0.35'/%3E%3C/svg%3E">
 
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <style>
   :root{
     --bg-1:#1b1035;
@@ -127,9 +129,17 @@
     width:52px; height:52px; flex-shrink:0;
     border-radius:17px;
     display:flex; align-items:center; justify-content:center;
-    font-size:28px;
     position:relative;
   }
+  
+  /* Ajustement de la taille des icônes Lucide SVG */
+  .icon-badge svg {
+    width: 26px; height: 26px; stroke-width: 2.2px; color: var(--text-1);
+  }
+  .icon-badge.sm svg {
+    width: 18px; height: 18px; stroke-width: 2.2px;
+  }
+
   .card .name{
     font-size:13.5px; font-weight:600; color:var(--text-1);
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
@@ -264,9 +274,11 @@
   .icon-grid button{
     aspect-ratio:1/1; border-radius:14px;
     background:var(--glass-fill); border:1px solid var(--glass-border);
-    font-size:21px; display:flex; align-items:center; justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     transition: transform .1s ease, background .1s ease;
   }
+  /* On force la couleur blanche sur les icônes de la grille de sélection */
+  .icon-grid button svg { width:22px; height:22px; color: #fff; }
   .icon-grid button:active{ transform: scale(0.88); background:var(--glass-fill-strong); }
   .icon-grid button.selected{ background: rgba(124,155,255,0.35); border-color:var(--accent); }
   .icon-grid .no-results{
@@ -291,7 +303,7 @@
     background:var(--glass-fill); border:1px solid var(--glass-border);
   }
   .app-row .icon-badge.sm{
-    width:40px; height:40px; border-radius:12px; font-size:18px; flex-shrink:0;
+    width:40px; height:40px; border-radius:12px; flex-shrink:0;
   }
   .app-row .info{ flex:1; min-width:0; }
   .app-row .info .n{ font-size:14.5px; font-weight:600; }
@@ -383,11 +395,11 @@
           <label>Icône</label>
           <button type="button" id="iconPickerBtn" class="icon-picker-trigger" aria-label="Choisir une icône">
             <span class="icon-badge" id="iconPreviewBadge" style="background-color:#7c9bff;">
-              <span id="iconPreviewSpan">📱</span>
+              <span id="iconPreviewSpan"><i data-lucide="smartphone"></i></span>
             </span>
             <span class="edit-dot">✎</span>
           </button>
-          <input type="hidden" id="iconInput" value="📱">
+          <input type="hidden" id="iconInput" value="smartphone">
         </div>
         <div class="field" style="flex:0;">
           <label for="colorInput">Couleur</label>
@@ -443,95 +455,78 @@
 (function(){
   "use strict";
   const STORAGE_KEY = "appHub.cards.v1";
-  const DEFAULT_ICON = "📱";
+  const DEFAULT_ICON = "smartphone";
   let cards = [];
   let editingId = null;
 
-  // ---------- Icon library ----------
+  // Palette de couleurs esthétiques pré-sélectionnées pour un rendu moderne
+  const COLOR_PALETTE = [
+    "#7c9bff", "#5e6bf2", "#ff7675", "#74b9ff", "#a29bfe", 
+    "#00b894", "#fd79a8", "#fdcb6e", "#e84393", "#0984e3", 
+    "#6c5ce7", "#2ecc71", "#e67e22", "#20bf6b", "#fa8231"
+  ];
+
+  function getRandomPaletteColor() {
+    return COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+  }
+
+  // ---------- Bibliothèque d'icônes Lucide (noms au lieu d'émojis) ----------
   const ICONS = [
-    {e:"📱", k:"application telephone app mobile"},
-    {e:"💻", k:"ordinateur informatique code developpement travail"},
-    {e:"🖥️", k:"ordinateur bureau ecran"},
-    {e:"⌨️", k:"clavier saisie code"},
-    {e:"🌐", k:"web internet site navigateur reseau"},
-    {e:"☁️", k:"cloud stockage nuage sauvegarde"},
-    {e:"📶", k:"wifi reseau signal connexion"},
-    {e:"🔒", k:"securite verrouillage mot de passe prive"},
-    {e:"🔑", k:"cle acces mot de passe securite"},
-    {e:"⚙️", k:"reglages parametres configuration outils"},
-    {e:"🔧", k:"outil reparation maintenance bricolage"},
-    {e:"🧩", k:"puzzle projet organisation module"},
-    {e:"💡", k:"idee astuce inspiration ampoule"},
-    {e:"🎯", k:"objectif but cible precision"},
-    {e:"🚀", k:"lancement projet productivite fusee"},
-    {e:"📊", k:"statistiques graphique donnees analyse"},
-    {e:"📈", k:"graphique bourse croissance investissement"},
-    {e:"🧮", k:"calcul mathematiques calculatrice"},
-    {e:"💰", k:"argent finance budget economie"},
-    {e:"💳", k:"carte bancaire paiement banque"},
-    {e:"🏦", k:"banque finance epargne"},
-    {e:"🧾", k:"facture ticket recu depense"},
-    {e:"📝", k:"notes liste texte memo bloc"},
-    {e:"✅", k:"taches todo liste coche fait"},
-    {e:"🗂️", k:"dossier organisation archives classement"},
-    {e:"📅", k:"calendrier agenda date rendez-vous"},
-    {e:"🗓️", k:"calendrier planning agenda"},
-    {e:"⏰", k:"alarme reveil heure rappel"},
-    {e:"⏱️", k:"minuteur chronometre temps"},
-    {e:"🔔", k:"notification alerte rappel cloche"},
-    {e:"📧", k:"email mail courrier message"},
-    {e:"💬", k:"message chat discussion conversation"},
-    {e:"📞", k:"telephone appel contact"},
-    {e:"📷", k:"photo appareil photo camera"},
-    {e:"🖼️", k:"image photo galerie cadre"},
-    {e:"🎵", k:"musique son chanson audio"},
-    {e:"🎬", k:"video film cinema"},
-    {e:"📺", k:"tele video streaming television"},
-    {e:"🎮", k:"jeu jeux video gaming console"},
-    {e:"📚", k:"livre lecture bibliotheque education"},
-    {e:"📖", k:"livre lecture roman"},
-    {e:"🎓", k:"etude ecole education apprentissage diplome"},
-    {e:"🎨", k:"art design creativite dessin peinture"},
-    {e:"🗺️", k:"carte plan navigation voyage"},
-    {e:"📍", k:"localisation carte position gps"},
-    {e:"✈️", k:"avion voyage vacances vol"},
-    {e:"🧳", k:"valise voyage bagage vacances"},
-    {e:"🚗", k:"voiture transport conduite trajet"},
-    {e:"🚲", k:"velo sport transport"},
-    {e:"🏋️", k:"sport fitness musculation gym salle"},
-    {e:"🏃", k:"course sport running jogging"},
-    {e:"🧘", k:"yoga meditation bien-etre relaxation"},
-    {e:"❤️", k:"sante coeur favoris amour"},
-    {e:"🩺", k:"sante medecin medical docteur"},
-    {e:"💊", k:"medicament sante pharmacie traitement"},
-    {e:"😴", k:"sommeil repos nuit dormir"},
-    {e:"🥗", k:"alimentation nutrition salade regime"},
-    {e:"🍳", k:"cuisine recette cuisson oeuf"},
-    {e:"🍽️", k:"repas restaurant nourriture table"},
-    {e:"☕", k:"cafe boisson the"},
-    {e:"🛒", k:"courses shopping achats supermarche"},
-    {e:"🛍️", k:"shopping achats boutique sac"},
-    {e:"🏠", k:"maison immobilier domicile accueil"},
-    {e:"🌱", k:"jardin plante jardinage nature"},
-    {e:"🐾", k:"animaux animal de compagnie patte"},
-    {e:"🐶", k:"chien animal"},
-    {e:"🐱", k:"chat animal"},
-    {e:"👶", k:"bebe enfant famille"},
-    {e:"👨‍👩‍👧", k:"famille parents enfant"},
-    {e:"🧹", k:"menage nettoyage entretien"},
-    {e:"👕", k:"vetements dressing mode garde-robe"},
-    {e:"📦", k:"colis livraison stockage boite"},
-    {e:"🔋", k:"batterie energie charge"},
-    {e:"🌦️", k:"meteo temps previsions pluie"},
-    {e:"🌍", k:"monde voyage planete carte"},
-    {e:"⭐", k:"favori important etoile"},
-    {e:"🔥", k:"tendance populaire energie feu"},
-    {e:"🏆", k:"trophee recompense succes objectif"},
-    {e:"🎉", k:"fete evenement celebration anniversaire"},
-    {e:"🧠", k:"cerveau memoire reflexion productivite"},
-    {e:"⚙️", k:"reglages"},
-    {e:"⚠️", k:"attention danger"},
-    {e:"💯", k:"cent excellence reussite"}
+    {e:"smartphone", k:"application telephone app mobile iphone"},
+    {e:"laptop", k:"ordinateur informatique code developpement travail"},
+    {e:"monitor", k:"ordinateur bureau ecran"},
+    {e:"keyboard", k:"clavier saisie code"},
+    {e:"globe", k:"web internet site navigateur reseau"},
+    {e:"cloud", k:"cloud stockage nuage sauvegarde"},
+    {e:"wifi", k:"wifi reseau signal connexion"},
+    {e:"lock", k:"securite verrouillage mot de passe prive"},
+    {e:"key", k:"cle acces mot de passe securite"},
+    {e:"settings", k:"reglages parametres configuration outils"},
+    {e:"wrench", k:"outil reparation maintenance bricolage"},
+    {e:"lightbulb", k:"idee astuce inspiration ampoule"},
+    {e:"target", k:"objectif but cible precision"},
+    {e:"rocket", k:"lancement projet productivite fusee"},
+    {e:"bar-chart-2", k:"statistiques graphique donnees analyse"},
+    {e:"trending-up", k:"graphique bourse croissance investissement"},
+    {e:"calculator", k:"calcul mathematiques calculatrice"},
+    {e:"dollar-sign", k:"argent finance budget economie"},
+    {e:"credit-card", k:"carte bancaire paiement banque"},
+    {e:"landmark", k:"banque finance epargne"},
+    {e:"file-text", k:"facture ticket recu depense notes liste"},
+    {e:"check-square", k:"taches todo liste coche fait"},
+    {e:"folder", k:"dossier organisation archives classement"},
+    {e:"calendar", k:"calendrier agenda date rendez-vous planning"},
+    {e:"bell", k:"notification alerte rappel cloche"},
+    {e:"mail", k:"email mail courrier message"},
+    {e:"message-square", k:"message chat discussion conversation"},
+    {e:"phone", k:"telephone appel contact"},
+    {e:"camera", k:"photo appareil photo camera"},
+    {e:"image", k:"image photo galerie cadre"},
+    {e:"music", k:"musique son chanson audio"},
+    {e:"film", k:"video film cinema"},
+    {e:"tv", k:"tele video streaming television"},
+    {e:"gamepad-2", k:"jeu jeux video gaming console"},
+    {e:"book", k:"livre lecture bibliotheque education"},
+    {e:"graduation-cap", k:"etude ecole education apprentissage diplome"},
+    {e:"palette", k:"art design creativite dessin peinture"},
+    {e:"map", k:"carte plan navigation voyage"},
+    {e:"map-pin", k:"localisation carte position gps"},
+    {e:"plane", k:"avion voyage vacances vol"},
+    {e:"briefcase", k:"travail valise voyage bagage vacances"},
+    {e:"car", k:"voiture transport conduite trajet"},
+    {e:"bike", k:"velo sport transport"},
+    {e:"heart", k:"sante coeur favoris amour"},
+    {e:"activity", k:"sante medecin medical docteur fitness running"},
+    {e:"shopping-cart", k:"courses shopping achats supermarche"},
+    {e:"home", k:"maison immobilier domicile accueil"},
+    {e:"leaf", k:"jardin plante jardinage nature"},
+    {e:"package", k:"colis livraison stockage boite"},
+    {e:"battery-charging", k:"batterie energie charge"},
+    {e:"sun", k:"meteo temps previsions soleil"},
+    {e:"star", k:"favori important etoile"},
+    {e:"flame", k:"tendance populaire energie feu"},
+    {e:"trophy", k:"trophee recompense succes objectif"},
+    {e:"alert-triangle", k:"attention danger"}
   ];
 
   function normalize(str){
@@ -604,13 +599,11 @@
       card.className = "card";
       card.href = "#";
       
-      // Open in our embedded webapp viewer instead of external Safari window
       card.addEventListener("click", function(e) {
         e.preventDefault();
         openAppViewer(c.url, c.name);
       });
 
-      // Gorgeous radial gradient background using the custom picked color
       const baseColor = c.color || '#7c9bff';
       card.style.background = `radial-gradient(circle at center, ${baseColor}FF 0%, ${baseColor}55 65%, rgba(255,255,255,0.01) 100%)`;
       card.style.borderColor = `${baseColor}44`;
@@ -618,7 +611,7 @@
 
       card.innerHTML = `
         <div class="icon-badge" style="background:none; box-shadow:none;">
-          <span>${escapeHtml(c.icon || DEFAULT_ICON)}</span>
+          <i data-lucide="${escapeHtml(c.icon || DEFAULT_ICON)}"></i>
         </div>
         <div class="name">${escapeHtml(c.name)}</div>
       `;
@@ -645,7 +638,7 @@
       row.className = "app-row";
       row.innerHTML = `
         <div class="icon-badge sm" style="background-color:${escapeHtml(c.color || '#7c9bff')}">
-          <span>${escapeHtml(c.icon || DEFAULT_ICON)}</span>
+          <i data-lucide="${escapeHtml(c.icon || DEFAULT_ICON)}"></i>
         </div>
         <div class="info">
           <div class="n">${escapeHtml(c.name)}</div>
@@ -666,6 +659,8 @@
     renderGrid();
     renderCount();
     renderAppList();
+    // On demande à Lucide de parser et générer tous les éléments SVG générés dynamiquement
+    lucide.createIcons();
   }
 
   // ---------- Form ----------
@@ -682,7 +677,8 @@
   function resetForm(){
     editingId = null;
     form.reset();
-    colorInput.value = "#7c9bff";
+    // Génération automatique d'une couleur aléatoire pour la prochaine appli !
+    colorInput.value = getRandomPaletteColor();
     iconInput.value = DEFAULT_ICON;
     updateIconPreview();
     submitBtn.textContent = "Ajouter";
@@ -708,7 +704,9 @@
   }
 
   function updateIconPreview(){
-    document.getElementById("iconPreviewSpan").textContent = iconInput.value || DEFAULT_ICON;
+    const previewSpan = document.getElementById("iconPreviewSpan");
+    previewSpan.innerHTML = `<i data-lucide="${iconInput.value || DEFAULT_ICON}"></i>`;
+    lucide.createIcons({ root: previewSpan });
     document.getElementById("iconPreviewBadge").style.backgroundColor = colorInput.value;
   }
 
@@ -724,7 +722,7 @@
     list.forEach(item => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.textContent = item.e;
+      btn.innerHTML = `<i data-lucide="${item.e}"></i>`;
       if(item.e === iconInput.value) btn.classList.add("selected");
       btn.addEventListener("click", function(){
         iconInput.value = item.e;
@@ -733,6 +731,8 @@
       });
       grid.appendChild(btn);
     });
+    // Rendu spécifique de Lucide pour la modale de sélection d'icônes
+    lucide.createIcons({ root: grid });
   }
 
   function openIconPicker(){
@@ -817,6 +817,11 @@
   function openSheet(){
     sheet.classList.add("show");
     overlay.classList.add("show");
+    // On génère une couleur aléatoire dès qu'on ouvre les réglages
+    if (!editingId) {
+      colorInput.value = getRandomPaletteColor();
+      updateIconPreview();
+    }
   }
   function closeSheet(){
     sheet.classList.remove("show");
@@ -888,10 +893,8 @@
     else if(h < 18) g = "Bon après-midi";
     document.getElementById("greetingText").textContent = g;
 
-    // Format current date in French style
     const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
     let dateStr = now.toLocaleDateString('fr-FR', options);
-    // Capitalize the first letter (e.g. "Jeudi")
     dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     document.getElementById("dateText").textContent = dateStr;
   }
