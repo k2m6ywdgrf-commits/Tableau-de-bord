@@ -47,7 +47,7 @@
   button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer;}
   input{font-family:inherit;}
 
-  /* ---------- Aurora background (signature element) ---------- */
+  /* ---------- Aurora background ---------- */
   .aurora{
     position:fixed; inset:0; z-index:-1; overflow:hidden;
     background: var(--bg-1);
@@ -94,22 +94,15 @@
   .greeting h1{
     margin:0; font-size:30px; font-weight:700; letter-spacing:-0.02em;
   }
-  .greeting .sub{ margin-top:4px; font-size:14px; color:var(--text-2); }
-  .clock{ font-size:14px; color:var(--text-2); font-variant-numeric: tabular-nums; }
-
-  .icon-btn{
-    width:40px; height:40px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--glass-fill);
-    border:1px solid var(--glass-border);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    font-size:18px;
-    transition: transform .15s ease, background .15s ease;
+  .greeting .date-display {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-top: 4px;
+    font-weight: 500;
   }
-  .icon-btn:active{ transform: scale(0.92); background:var(--glass-fill-strong); }
+  .greeting .sub{ margin-top:2px; font-size:12px; color:var(--text-3); }
 
-  /* Grid */
+  /* Grid & Cards */
   .grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
@@ -121,12 +114,11 @@
     gap:11px;
     padding:14px 10px;
     border-radius:26px;
-    background: linear-gradient(155deg, var(--glass-fill-strong), var(--glass-fill));
     border:1px solid var(--glass-border);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.28), inset 0 1px 0 var(--glass-highlight);
-    transition: transform .12s ease;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+    transition: transform .12s ease, box-shadow .12s ease;
     text-align:center;
   }
   .card:active{ transform: scale(0.94); }
@@ -135,21 +127,14 @@
     width:52px; height:52px; flex-shrink:0;
     border-radius:17px;
     display:flex; align-items:center; justify-content:center;
-    font-size:25px;
-    position:relative; overflow:hidden;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4);
+    font-size:28px;
+    position:relative;
   }
-  .icon-badge::before{
-    content:""; position:absolute; inset:0;
-    background: linear-gradient(155deg, rgba(255,255,255,0.45), rgba(255,255,255,0) 58%);
-  }
-  .icon-badge span{ position:relative; z-index:1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25)); }
-
   .card .name{
     font-size:13.5px; font-weight:600; color:var(--text-1);
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
     line-height:1.28; word-break:break-word;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
 
   .empty-state{
@@ -160,6 +145,23 @@
   }
   .empty-state .e-icon{ font-size:40px; margin-bottom:10px; }
   .empty-state b{ color:var(--text-1); }
+
+  /* ---------- Webapp Viewer (In-App Browser) ---------- */
+  .app-viewer {
+    position: fixed; inset: 0; background: #15102b; z-index: 100;
+    display: none; flex-direction: column;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .app-viewer.show { display: flex; }
+  .viewer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: rgba(20,15,35,0.85);
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .viewer-title { font-size: 16px; font-weight: 600; color: var(--text-1); text-align: center; flex: 1; }
+  .viewer-iframe { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
 
   /* ---------- Sheet ---------- */
   .overlay{
@@ -324,7 +326,6 @@
   .toast.show{ opacity:1; transform: translate(-50%, 0); }
 
   ::-webkit-scrollbar{ display:none; }
-
   :focus-visible{ outline: 2px solid #fff; outline-offset:2px; border-radius:8px; }
 </style>
 </head>
@@ -341,6 +342,7 @@
   <header class="top">
     <div class="greeting">
       <h1 id="greetingText">Mes Apps</h1>
+      <div class="date-display" id="dateText"></div>
       <div class="sub" id="countText">0 application</div>
     </div>
     <button class="icon-btn" id="openSettingsBtn" aria-label="Réglages">⚙️</button>
@@ -424,6 +426,15 @@
     <div class="icon-grid" id="iconGrid"></div>
    </div>
   </div>
+</div>
+
+<div class="app-viewer" id="appViewer">
+  <div class="viewer-header">
+    <button class="icon-btn" id="closeViewerBtn" aria-label="Retour">←</button>
+    <div class="viewer-title" id="viewerTitle">Application</div>
+    <div style="width:40px;"></div>
+  </div>
+  <iframe class="viewer-iframe" id="viewerIframe" src=""></iframe>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -518,255 +529,11 @@
     {e:"🏆", k:"trophee recompense succes objectif"},
     {e:"🎉", k:"fete evenement celebration anniversaire"},
     {e:"🧠", k:"cerveau memoire reflexion productivite"},
-
-    // Tech & bureau (suite)
-    {e:"🖱️", k:"souris ordinateur clic"},
-    {e:"🖨️", k:"imprimante bureau"},
-    {e:"🔌", k:"prise electrique branchement courant"},
-    {e:"🔦", k:"lampe torche lumiere"},
-    {e:"🔓", k:"deverrouille ouvert acces"},
-    {e:"🗝️", k:"vieille cle tresor"},
-    {e:"🛡️", k:"bouclier protection securite"},
-    {e:"🚨", k:"alerte urgence securite"},
-    {e:"🛠️", k:"outils boite a outils bricolage reparation"},
-    {e:"🔨", k:"marteau bricolage outil"},
-    {e:"🧰", k:"boite a outils bricolage"},
-    {e:"🧲", k:"aimant physique science attraction"},
-    {e:"🔭", k:"telescope astronomie observation"},
-    {e:"🛰️", k:"satellite espace communication"},
-    {e:"🧪", k:"science laboratoire experience chimie"},
-    {e:"🧬", k:"adn genetique science biologie"},
-    {e:"🔬", k:"microscope science laboratoire"},
-    {e:"🧫", k:"biologie laboratoire culture"},
-    {e:"🧯", k:"extincteur securite incendie"},
-
-    // Communication
-    {e:"🗣️", k:"discours parole conversation"},
-    {e:"📢", k:"annonce megaphone information"},
-    {e:"📣", k:"megaphone annonce appel"},
-    {e:"📨", k:"message envoye boite mail"},
-    {e:"📤", k:"envoi sortant exporter"},
-    {e:"📥", k:"reception entrant importer"},
-    {e:"✉️", k:"enveloppe courrier lettre"},
-    {e:"💌", k:"lettre amour message romantique"},
-    {e:"🎥", k:"camera film tournage video"},
-    {e:"🎙️", k:"microphone podcast enregistrement"},
-    {e:"🎧", k:"casque audio musique ecoute"},
-    {e:"🔊", k:"haut-parleur son volume"},
-
-    // Bureau & productivite
-    {e:"🗃️", k:"archive classement boite"},
-    {e:"🗄️", k:"classeur bureau rangement"},
-    {e:"📌", k:"epingle rappel important"},
-    {e:"📎", k:"trombone bureau attache"},
-    {e:"✂️", k:"ciseaux bureau decoupe"},
-    {e:"📏", k:"regle mesure"},
-    {e:"📐", k:"equerre geometrie mesure"},
-    {e:"✏️", k:"crayon ecriture brouillon"},
-    {e:"🖋️", k:"stylo plume ecriture"},
-    {e:"🖌️", k:"pinceau peinture dessin art"},
-    {e:"🖍️", k:"crayon de couleur dessin enfant"},
-    {e:"🗳️", k:"vote urne election"},
-
-    // Finance
-    {e:"💴", k:"yen argent monnaie"},
-    {e:"💵", k:"dollar argent monnaie"},
-    {e:"💶", k:"euro argent monnaie"},
-    {e:"💷", k:"livre sterling argent monnaie"},
-    {e:"🪙", k:"piece monnaie argent"},
-    {e:"💱", k:"change devise conversion"},
-    {e:"🪪", k:"carte identite document"},
-
-    // Donnees & science
-    {e:"📉", k:"graphique baisse perte statistiques"},
-    {e:"⚗️", k:"chimie laboratoire experience"},
-    {e:"🛸", k:"ovni espace mystere"},
-    {e:"🌌", k:"voie lactee galaxie espace"},
-    {e:"🪐", k:"planete espace univers"},
-    {e:"☄️", k:"comete espace astronomie"},
-
-    // Art & loisirs
-    {e:"🎭", k:"theatre spectacle representation"},
-    {e:"🎤", k:"microphone chant karaoke"},
-    {e:"🎹", k:"piano musique instrument"},
-    {e:"🎸", k:"guitare musique instrument"},
-    {e:"🥁", k:"batterie musique instrument"},
-    {e:"🎺", k:"trompette musique instrument"},
-    {e:"🎻", k:"violon musique instrument"},
-    {e:"📽️", k:"projecteur cinema film"},
-    {e:"🎲", k:"de jeu de societe hasard"},
-    {e:"♟️", k:"echecs strategie jeu reflexion"},
-    {e:"🧸", k:"peluche jouet enfant"},
-    {e:"🪁", k:"cerf-volant jeu plein air"},
-    {e:"🎳", k:"bowling sport loisir"},
-
-    // Sport & fitness
-    {e:"⚽️", k:"football ballon sport"},
-    {e:"🏀", k:"basketball sport"},
-    {e:"🏈", k:"football americain sport"},
-    {e:"⚾️", k:"baseball sport"},
-    {e:"🎾", k:"tennis sport"},
-    {e:"🏐", k:"volleyball sport"},
-    {e:"🏓", k:"tennis de table ping pong"},
-    {e:"🏸", k:"badminton sport"},
-    {e:"🥊", k:"boxe sport combat"},
-    {e:"🥋", k:"arts martiaux judo karate"},
-    {e:"⛳️", k:"golf sport"},
-    {e:"🏹", k:"tir a l'arc sport"},
-    {e:"🎣", k:"peche loisir"},
-    {e:"🏂", k:"snowboard sport hiver"},
-    {e:"⛷️", k:"ski sport hiver"},
-    {e:"🏄‍♂️", k:"surf sport mer"},
-    {e:"🏊‍♂️", k:"natation piscine sport"},
-    {e:"🚴‍♂️", k:"velo cyclisme sport"},
-    {e:"🧗‍♂️", k:"escalade grimpe sport"},
-    {e:"🤸‍♂️", k:"gymnastique sport"},
-    {e:"🥇", k:"medaille or recompense victoire"},
-
-    // Sante & bien-etre
-    {e:"🩹", k:"pansement blessure soin"},
-    {e:"🌡️", k:"thermometre fievre temperature"},
-    {e:"🦷", k:"dent dentiste hygiene"},
-    {e:"👁️", k:"oeil vision optique"},
-    {e:"🦴", k:"os squelette"},
-    {e:"🏥", k:"hopital sante medical urgence"},
-
-    // Alimentation
-    {e:"🍏", k:"pomme fruit"},
-    {e:"🍌", k:"banane fruit"},
-    {e:"🍉", k:"pasteque fruit"},
-    {e:"🍇", k:"raisin fruit"},
-    {e:"🍓", k:"fraise fruit"},
-    {e:"🥑", k:"avocat legume"},
-    {e:"🥦", k:"brocoli legume"},
-    {e:"🥕", k:"carotte legume"},
-    {e:"🍞", k:"pain boulangerie"},
-    {e:"🥐", k:"croissant boulangerie viennoiserie"},
-    {e:"🧀", k:"fromage"},
-    {e:"🥚", k:"oeuf"},
-    {e:"🥞", k:"crepe pancake petit dejeuner"},
-    {e:"🍕", k:"pizza"},
-    {e:"🍔", k:"burger hamburger"},
-    {e:"🍟", k:"frites"},
-    {e:"🌮", k:"taco mexicain"},
-    {e:"🍣", k:"sushi japonais"},
-    {e:"🍜", k:"nouilles ramen soupe"},
-    {e:"🍲", k:"ragout soupe plat"},
-    {e:"🍝", k:"pates spaghetti italien"},
-    {e:"🍱", k:"bento japonais repas"},
-    {e:"🍰", k:"gateau patisserie dessert"},
-    {e:"🎂", k:"anniversaire gateau fete"},
-    {e:"🍫", k:"chocolat sucrerie"},
-    {e:"🍪", k:"biscuit cookie sucrerie"},
-    {e:"🍿", k:"popcorn cinema"},
-    {e:"🍯", k:"miel"},
-    {e:"🥛", k:"lait boisson"},
-    {e:"🍵", k:"the boisson chaude"},
-    {e:"🧃", k:"jus boisson"},
-    {e:"🍺", k:"biere alcool"},
-    {e:"🍷", k:"vin alcool"},
-    {e:"🍹", k:"cocktail boisson alcool"},
-
-    // Shopping & mode
-    {e:"👗", k:"robe vetement mode"},
-    {e:"👖", k:"pantalon vetement"},
-    {e:"👟", k:"chaussure sport basket"},
-    {e:"👠", k:"chaussure talon mode"},
-    {e:"👜", k:"sac a main mode"},
-    {e:"🕶️", k:"lunettes de soleil mode accessoire"},
-    {e:"💎", k:"diamant bijou luxe"},
-    {e:"👑", k:"couronne royaute luxe"},
-
-    // Maison & vie quotidienne
-    {e:"🏡", k:"maison jardin domicile"},
-    {e:"🛋️", k:"canape salon meuble"},
-    {e:"🛏️", k:"lit chambre sommeil"},
-    {e:"🚿", k:"douche salle de bain hygiene"},
-    {e:"🛁", k:"baignoire salle de bain"},
-    {e:"🪑", k:"chaise meuble"},
-    {e:"🚪", k:"porte maison entree"},
-    {e:"🪟", k:"fenetre maison"},
-    {e:"🧺", k:"panier linge lessive"},
-    {e:"🧼", k:"savon hygiene proprete"},
-
-    // Nature & meteo
-    {e:"🌿", k:"ecologie nature plante verte"},
-    {e:"☀️", k:"soleil ensoleille beau temps"},
-    {e:"⛅️", k:"nuage soleil temps variable"},
-    {e:"🌧️", k:"pluie meteo"},
-    {e:"⛈️", k:"orage tempete meteo"},
-    {e:"❄️", k:"neige flocon hiver meteo"},
-    {e:"☂️", k:"parapluie pluie protection"},
-    {e:"🌈", k:"arc en ciel meteo"},
-    {e:"🌊", k:"vague mer ocean"},
-    {e:"🌙", k:"lune nuit ciel"},
-    {e:"🌕", k:"pleine lune nuit"},
-
-    // Animaux
-    {e:"🐭", k:"souris animal"},
-    {e:"🐰", k:"lapin animal"},
-    {e:"🦊", k:"renard animal"},
-    {e:"🐻", k:"ours animal"},
-    {e:"🐼", k:"panda animal"},
-    {e:"🐯", k:"tigre animal"},
-    {e:"🦁", k:"lion animal"},
-    {e:"🐮", k:"vache animal ferme"},
-    {e:"🐷", k:"cochon animal ferme"},
-    {e:"🐸", k:"grenouille animal"},
-    {e:"🐔", k:"poule animal ferme"},
-    {e:"🐦", k:"oiseau animal"},
-    {e:"🦋", k:"papillon insecte"},
-    {e:"🐢", k:"tortue animal lent"},
-    {e:"🐍", k:"serpent animal"},
-    {e:"🐙", k:"pieuvre mer animal"},
-    {e:"🐠", k:"poisson mer aquarium"},
-    {e:"🐬", k:"dauphin mer animal"},
-    {e:"🦒", k:"girafe animal"},
-    {e:"🦓", k:"zebre animal"},
-
-    // Famille & metiers
-    {e:"👴", k:"grand-pere senior famille"},
-    {e:"👵", k:"grand-mere senior famille"},
-    {e:"🧑‍🍳", k:"cuisinier chef metier"},
-    {e:"🧑‍🎓", k:"etudiant diplome metier"},
-    {e:"🧑‍💻", k:"developpeur informaticien metier"},
-    {e:"🧑‍🏫", k:"professeur enseignant metier"},
-    {e:"🧑‍⚕️", k:"medecin infirmier metier sante"},
-    {e:"🧑‍🌾", k:"agriculteur jardinier metier"},
-    {e:"🧑‍🔧", k:"mecanicien technicien metier"},
-
-    // Voyage & transport
-    {e:"🚕", k:"taxi transport"},
-    {e:"🚌", k:"bus transport commun"},
-    {e:"🚆", k:"train transport voyage"},
-    {e:"🚂", k:"locomotive train transport"},
-    {e:"🚁", k:"helicoptere transport vol"},
-    {e:"🚢", k:"bateau navire transport mer"},
-    {e:"⛵️", k:"voilier voile bateau mer"},
-    {e:"🏖️", k:"plage vacances mer"},
-    {e:"🏔️", k:"montagne paysage nature"},
-    {e:"🏜️", k:"desert paysage nature"},
-    {e:"⛺️", k:"tente camping plein air"},
-    {e:"🎡", k:"grande roue fete parc attraction"},
-    {e:"🎢", k:"montagnes russes parc attraction"},
-
-    // Fetes & celebrations
-    {e:"🎄", k:"noel sapin fete"},
-    {e:"🎃", k:"halloween citrouille fete"},
-    {e:"🎆", k:"feu d'artifice fete celebration"},
-    {e:"🧨", k:"petard fete celebration"},
-    {e:"🥳", k:"fete celebration anniversaire"},
-    {e:"🎁", k:"cadeau fete anniversaire"},
-    {e:"🎈", k:"ballon fete anniversaire"},
-    {e:"🎊", k:"confettis fete celebration"},
-
-    // Symboles
-    {e:"⚠️", k:"attention danger avertissement"},
-    {e:"♻️", k:"recyclage ecologie environnement"},
-    {e:"♿️", k:"accessibilite handicap"},
-    {e:"🆘", k:"urgence secours aide"},
-    {e:"💯", k:"cent pourcent excellence reussite"}
+    {e:"⚙️", k:"reglages"},
+    {e:"⚠️", k:"attention danger"},
+    {e:"💯", k:"cent excellence reussite"}
   ];
+
   function normalize(str){
     return (str || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
@@ -781,7 +548,7 @@
   }
   function save(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(cards)); }
-    catch(e){ showToast("Impossible d'enregistrer (stockage plein ou bloqué)."); }
+    catch(e){ showToast("Impossible d'enregistrer."); }
   }
   function uid(){
     return (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
@@ -806,24 +573,51 @@
     t._timer = setTimeout(()=> t.classList.remove("show"), 2200);
   }
 
+  // ---------- Webapp Viewer Controllers ----------
+  const appViewer = document.getElementById("appViewer");
+  const viewerIframe = document.getElementById("viewerIframe");
+  const viewerTitle = document.getElementById("viewerTitle");
+
+  function openAppViewer(url, name) {
+    viewerIframe.src = normalizeUrl(url);
+    viewerTitle.textContent = name;
+    appViewer.classList.add("show");
+  }
+  function closeAppViewer() {
+    appViewer.classList.remove("show");
+    viewerIframe.src = "";
+  }
+  document.getElementById("closeViewerBtn").addEventListener("click", closeAppViewer);
+
   // ---------- Rendering: home grid ----------
   function renderGrid(){
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
     if(cards.length === 0){
-      grid.innerHTML = `<div class="empty-state"><div class="e-icon">✨</div>Aucune application pour le moment.<br>Ouvrez les <b>Réglages ⚙️</b> pour ajouter votre première carte.</div>`;
+      grid.innerHTML = `<div class="empty-state"><div class="e-icon">✨</div>Aucune application.<br>Ouvrez les <b>Réglages ⚙️</b> pour en ajouter une.</div>`;
       return;
     }
 
     cards.forEach(c => {
       const card = document.createElement("a");
       card.className = "card";
-      card.href = normalizeUrl(c.url);
-      card.target = "_blank";
-      card.rel = "noopener noreferrer";
+      card.href = "#";
+      
+      // Open in our embedded webapp viewer instead of external Safari window
+      card.addEventListener("click", function(e) {
+        e.preventDefault();
+        openAppViewer(c.url, c.name);
+      });
+
+      // Gorgeous radial gradient background using the custom picked color
+      const baseColor = c.color || '#7c9bff';
+      card.style.background = `radial-gradient(circle at center, ${baseColor}FF 0%, ${baseColor}55 65%, rgba(255,255,255,0.01) 100%)`;
+      card.style.borderColor = `${baseColor}44`;
+      card.style.boxShadow = `0 10px 28px rgba(0,0,0,0.25), inset 0 1px 0 ${baseColor}44`;
+
       card.innerHTML = `
-        <div class="icon-badge" style="background-color:${escapeHtml(c.color || '#7c9bff')}">
+        <div class="icon-badge" style="background:none; box-shadow:none;">
           <span>${escapeHtml(c.icon || DEFAULT_ICON)}</span>
         </div>
         <div class="name">${escapeHtml(c.name)}</div>
@@ -913,7 +707,6 @@
     document.getElementById("sheetBody").scrollTo({top:0, behavior:"smooth"});
   }
 
-  // ---------- Icon picker ----------
   function updateIconPreview(){
     document.getElementById("iconPreviewSpan").textContent = iconInput.value || DEFAULT_ICON;
     document.getElementById("iconPreviewBadge").style.backgroundColor = colorInput.value;
@@ -925,7 +718,7 @@
     const list = !q ? ICONS : ICONS.filter(i => normalize(i.k).includes(q));
     grid.innerHTML = "";
     if(list.length === 0){
-      grid.innerHTML = `<div class="no-results">Aucune icône pour « ${escapeHtml(query)} ». Essayez un autre mot.</div>`;
+      grid.innerHTML = `<div class="no-results">Aucune icône pour « ${escapeHtml(query)} ».</div>`;
       return;
     }
     list.forEach(item => {
@@ -1085,18 +878,26 @@
     }
   });
 
-  // ---------- Clock / greeting ----------
-  function updateGreeting(){
-    const h = new Date().getHours();
+  // ---------- Clock / greeting / Date ----------
+  function updateGreetingAndDate(){
+    const now = new Date();
+    const h = now.getHours();
     let g = "Bonsoir";
     if(h < 6) g = "Bonne nuit";
     else if(h < 12) g = "Bonjour";
     else if(h < 18) g = "Bon après-midi";
     document.getElementById("greetingText").textContent = g;
+
+    // Format current date in French style
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    let dateStr = now.toLocaleDateString('fr-FR', options);
+    // Capitalize the first letter (e.g. "Jeudi")
+    dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    document.getElementById("dateText").textContent = dateStr;
   }
-  updateGreeting();
 
   // ---------- Init ----------
+  updateGreetingAndDate();
   load();
   renderAll();
 })();
