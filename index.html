@@ -26,8 +26,7 @@
     
     --accent-cyan: #00f2fe;
     --accent-purple: #d946ef;
-    --accent-gradient-1: linear-gradient(135deg, #d946ef, #8b5cf6);
-    --accent-gradient-2: linear-gradient(135deg, #00f2fe, #1d4ed8);
+    --accent-gradient: linear-gradient(135deg, #00f2fe, #1d4ed8);
     --danger: #ff4a5a;
     
     --radius-card: 16px;
@@ -41,7 +40,7 @@
   html, body { height: 100%; background-color: var(--bg-main); }
   
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
     color: var(--text-primary);
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
@@ -51,18 +50,18 @@
   button { font-family: inherit; border: none; background: none; color: inherit; cursor: pointer; }
   input { font-family: inherit; }
 
-  /* Contexte de fond subtil inspiré de l'image (lumières diffuses lointaines) */
+  /* Ambiance lumineuse diffuse (style CRM alternatif) */
   .bg-glow {
     position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
   }
   .bg-glow::before {
     content: ''; position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
-    background: radial-gradient(circle, rgba(217, 70, 239, 0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(217, 70, 239, 0.08) 0%, transparent 70%);
     filter: blur(80px);
   }
   .bg-glow::after {
     content: ''; position: absolute; bottom: -10%; right: -10%; width: 60vw; height: 60vw;
-    background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%);
     filter: blur(100px);
   }
 
@@ -70,112 +69,97 @@
   .screen {
     position: relative;
     min-height: 100vh;
-    padding: calc(var(--safe-top) + 30px) 24px calc(var(--safe-bottom) + 40px);
-    max-width: 1100px; /* Élargi pour un vrai rendu dashboard élégant */
+    padding: calc(var(--safe-top) + 40px) 24px calc(var(--safe-bottom) + 40px);
+    max-width: 1100px;
     margin: 0 auto;
   }
 
-  /* En-tête type Cockpit */
+  /* En-tête minimaliste */
   header.top {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 20px;
+    padding-bottom: 24px;
   }
   .greeting h1 {
-    font-size: 28px; font-weight: 800; letter-spacing: -0.03em;
-    background: linear-gradient(120deg, #fff 40%, var(--text-secondary));
+    font-size: 32px; font-weight: 800; letter-spacing: -0.03em;
+    background: linear-gradient(120deg, #fff 50%, var(--text-secondary));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
   .greeting .meta-row {
     display: flex; align-items: center; gap: 12px; margin-top: 6px;
-    font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.05em;
   }
   .meta-row .badge {
-    background: rgba(255, 255, 255, 0.05); padding: 3px 8px; border-radius: 6px;
-    border: 1px solid var(--border-color); color: var(--accent-cyan); font-size: 11px;
+    background: rgba(0, 242, 254, 0.08); padding: 2px 8px; border-radius: 6px;
+    border: 1px solid rgba(0, 242, 254, 0.2); color: var(--accent-cyan); font-size: 11px;
   }
 
   .icon-btn-settings {
-    width: 44px; height: 44px; border-radius: 12px;
+    width: 46px; height: 46px; border-radius: 14px;
     background: var(--bg-card); border: 1px solid var(--border-color);
     display: flex; align-items: center; justify-content: center;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
   .icon-btn-settings:hover {
     border-color: var(--text-secondary); transform: translateY(-2px);
   }
 
-  /* Widgets statistiques du haut inspirés du CRM de l'image */
-  .stats-strip {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px; margin-bottom: 32px;
-  }
-  .stat-card {
-    background: var(--bg-card); border: 1px solid var(--border-color);
-    padding: 18px; border-radius: var(--radius-card);
-    display: flex; align-items: center; gap: 16px;
-  }
-  .stat-card .icon-wrap {
-    width: 42px; height: 42px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .stat-card.c1 .icon-wrap { background: rgba(217, 70, 239, 0.1); color: var(--accent-purple); }
-  .stat-card.c2 .icon-wrap { background: rgba(0, 242, 254, 0.1); color: var(--accent-cyan); }
-  .stat-card .stat-info .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-  .stat-card .stat-info .val { font-size: 20px; font-weight: 700; margin-top: 2px; }
-
-  /* Grille des applications principales */
+  /* Titre de section */
   .grid-title {
-    font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 18px;
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
   }
   
-  /* Cartes Apps Style WoW / Néon épuré */
+  /* Grille des applications */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Cartes épurées et contrastées */
   .card {
     position: relative; background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-card);
-    padding: 22px 14px;
+    padding: 24px 14px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 14px; text-align: center;
+    gap: 16px; text-align: center;
     transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
   
-  /* Ligne de lueur supérieure sur les cartes au survol */
+  /* Ligne de lueur supérieure au survol */
   .card::before {
     content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px;
     background: var(--card-glow-color, var(--accent-cyan));
     opacity: 0; transition: opacity 0.25s ease;
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 1px 10px var(--card-glow-color, var(--accent-cyan));
+    box-shadow: 0 1px 12px var(--card-glow-color, var(--accent-cyan));
   }
 
   .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     background: var(--bg-card-hover);
     border-color: var(--card-border-glow, var(--border-color-glow));
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
   }
   .card:hover::before { opacity: 1; }
   .card:active { transform: scale(0.97); }
 
   .icon-container {
-    width: 56px; height: 56px; border-radius: 14px;
+    width: 58px; height: 58px; border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     transition: transform 0.25s ease;
   }
   .card:hover .icon-container {
-    transform: scale(1.08);
+    transform: scale(1.06);
   }
   .icon-container svg {
     width: 26px; height: 26px; stroke-width: 2px; color: var(--card-icon-color, #fff);
@@ -183,19 +167,19 @@
 
   .card .name {
     font-size: 14px; font-weight: 600; color: var(--text-primary);
-    line-height: 1.3; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.35; overflow: hidden; text-overflow: ellipsis;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     word-break: break-word;
   }
 
   .empty-state {
-    grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+    grid-column: 1 / -1; text-align: center; padding: 80px 20px;
     color: var(--text-secondary); background: var(--bg-card);
     border-radius: var(--radius-card); border: 1px solid var(--border-color);
   }
   .empty-state b { color: var(--accent-cyan); }
 
-  /* ---------- App Viewer (Plein écran immersif) ---------- */
+  /* ---------- App Viewer (Lecteur plein écran) ---------- */
   .app-viewer {
     position: fixed; inset: 0; background: var(--bg-main); z-index: 200;
     display: none; flex-direction: column;
@@ -207,14 +191,14 @@
     padding: 14px 20px; background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
   }
-  .viewer-title { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+  .viewer-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
   .viewer-iframe { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
 
-  /* ---------- Volet Réglages (Sheet) ---------- */
+  /* ---------- Panneau de Configuration ---------- */
   .overlay {
-    position: fixed; inset: 0; background: rgba(4, 3, 9, 0.8);
+    position: fixed; inset: 0; background: rgba(4, 3, 9, 0.85);
     opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 90;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
   }
   .overlay.show { opacity: 1; pointer-events: auto; }
 
@@ -224,7 +208,7 @@
     background: #110e21;
     border-top-left-radius: var(--radius-sheet); border-top-right-radius: var(--radius-sheet);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -15px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 -15px 40px rgba(0,0,0,0.7);
     transform: translateY(105%); transition: transform .35s cubic-bezier(0.15, 0.85, 0.15, 1);
     z-index: 100; display: flex; flex-direction: column;
     padding-bottom: calc(var(--safe-bottom) + 16px);
@@ -239,7 +223,7 @@
   .sheet-body { overflow-y: auto; padding: 0 24px 20px; }
   .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-cyan); margin: 24px 0 12px; }
 
-  /* Formulaires & Inputs Propres */
+  /* Éléments de formulaire */
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
   .field input[type="text"], .field input[type="url"] {
@@ -261,12 +245,12 @@
 
   /* Boutons */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; width: 100%; transition: opacity 0.2s, transform 0.1s; }
-  .btn-primary { background: var(--accent-gradient-2); color: #fff; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.2); }
+  .btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.2); }
   .btn-primary:active { transform: scale(0.98); }
   .btn-ghost { background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; }
   .btn-row { display: flex; gap: 12px; margin-top: 10px; }
 
-  /* Liste de gestion des applications */
+  /* Liste de tri des applications */
   .app-list { display: flex; flex-direction: column; gap: 10px; }
   .app-row { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); }
   .app-row .row-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
@@ -292,7 +276,7 @@
   .danger-link { color: var(--danger); font-size: 13px; font-weight: 600; text-align: center; display: block; margin-top: 16px; padding: 8px; }
   .hint { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 16px; line-height: 1.5; }
 
-  /* Toast de notification */
+  /* Toast notification */
   .toast { position: fixed; bottom: calc(var(--safe-bottom) + 20px); left: 50%; transform: translate(-50%, 20px); background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; font-size: 13.5px; font-weight: 700; opacity: 0; transition: all .25s ease; pointer-events: none; z-index: 300; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
@@ -304,9 +288,10 @@
 <div class="bg-glow"></div>
 
 <div class="screen">
+  <!-- En-tête minimaliste et personnalisé -->
   <header class="top">
     <div class="greeting">
-      <h1 id="greetingText">Système actif</h1>
+      <h1 id="greetingText">Bonjour</h1>
       <div class="meta-row">
         <span id="dateText">Date système</span>
         <span class="badge" id="countBadge">0 App</span>
@@ -317,30 +302,15 @@
     </button>
   </header>
 
-  <div class="stats-strip">
-    <div class="stat-card c1">
-      <div class="icon-wrap"><i data-lucide="layout-grid" style="width: 20px; height: 20px;"></i></div>
-      <div class="stat-info">
-        <div class="label">Raccourcis configurés</div>
-        <div class="val" id="statTotal">0</div>
-      </div>
-    </div>
-    <div class="stat-card c2">
-      <div class="icon-wrap"><i data-lucide="activity" style="width: 20px; height: 20px;"></i></div>
-      <div class="stat-info">
-        <div class="label">Status Base Locale</div>
-        <div class="val" style="color: var(--accent-cyan); font-size: 14px; font-weight: bold; text-transform: uppercase;">Opérationnel</div>
-      </div>
-    </div>
-  </div>
-
+  <!-- Grille des applications principales -->
   <div class="grid-title">
     <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--accent-cyan)"></i>
-    Vos Modules Applicatifs
+    Vos Modules Web
   </div>
   <div class="grid" id="grid"></div>
 </div>
 
+<!-- Centre de contrôle latéral/bas (Sheet) -->
 <div class="overlay" id="overlay"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Réglages">
   <div class="grabber"></div>
@@ -351,6 +321,14 @@
 
   <div class="sheet-body" id="sheetBody">
     <div id="settingsView">
+      
+      <!-- Section profil utilisateur -->
+      <div class="section-title">Profil</div>
+      <div class="field">
+        <label for="usernameInput">Votre prénom (pour l'accueil)</label>
+        <input type="text" id="usernameInput" placeholder="Ex. Maxime" maxlength="20">
+      </div>
+
       <div class="section-title" id="formTitle">Ajouter un module web</div>
 
       <div class="editing-banner" id="editingBanner" style="display:none;">
@@ -402,6 +380,7 @@
       <p class="hint">Vos applications restent exclusivement hébergées localement dans le stockage de votre navigateur.</p>
     </div>
 
+    <!-- Modale interne de recherche d'icônes -->
     <div id="iconPickerView" style="display:none;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
         <button type="button" class="btn btn-ghost" id="iconBackBtn" style="width: auto; padding: 6px 12px;">← Retour</button>
@@ -416,6 +395,7 @@
   </div>
 </div>
 
+<!-- Visionneuse applicative intégrée -->
 <div class="app-viewer" id="appViewer">
   <div class="viewer-header">
     <button class="btn btn-ghost" id="closeViewerBtn" style="width: auto; padding: 8px 16px;">← Fermer la console</button>
@@ -431,6 +411,7 @@
 (function(){
   "use strict";
   const STORAGE_KEY = "appHub.cards.v1";
+  const USER_KEY = "appHub.username.v1";
   const DEFAULT_ICON = "smartphone";
   let cards = [];
   let editingId = null;
@@ -456,6 +437,9 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       cards = raw ? JSON.parse(raw) : [];
+      
+      const savedUser = localStorage.getItem(USER_KEY);
+      if(savedUser) document.getElementById("usernameInput").value = savedUser;
     } catch(e) { cards = []; }
   }
   function save(){
@@ -468,7 +452,7 @@
   
   function showToast(msg){
     const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
-    clearTimeout(t._timer); t._timer = setTimeout(()=> t.classList.remove("show"), 200);
+    clearTimeout(t._timer); t._timer = setTimeout(()=> t.classList.remove("show"), 2200);
   }
 
   const appViewer = document.getElementById("appViewer");
@@ -503,9 +487,8 @@
 
   function renderCount(){
     const n = cards.length;
-    document.getElementById("countBadge").textContent = n === 1 ? "1 Application" : (n + " Applications");
+    document.getElementById("countBadge").textContent = n === 1 ? "1 Module" : (n + " Modules");
     document.getElementById("listCount").textContent = n;
-    document.getElementById("statTotal").textContent = n;
   }
 
   function renderAppList(){
@@ -543,6 +526,13 @@
   const formTitle = document.getElementById("formTitle");
   const editingBanner = document.getElementById("editingBanner");
   const editingName = document.getElementById("editingName");
+  const usernameInput = document.getElementById("usernameInput");
+
+  // Événement pour sauvegarder le prénom à la volée et rafraîchir l'interface
+  usernameInput.addEventListener("input", function(){
+    localStorage.setItem(USER_KEY, this.value.trim());
+    updateClockAndGreeting();
+  });
 
   function resetForm(){
     editingId = null; form.reset(); colorInput.value = getRandomPaletteColor(); iconInput.value = DEFAULT_ICON;
@@ -641,15 +631,23 @@
     if(confirm("Attention: Cette action va vider l'intégralité de vos raccourcis.")) { cards = []; save(); renderAll(); }
   });
 
-  function updateClock(){
+  function updateClockAndGreeting(){
     const now = new Date();
     const h = now.getHours();
-    document.getElementById("greetingText").textContent = h < 6 ? "Session Nocturne" : h < 12 ? "Bonjour, Système Prêt" : h < 18 ? "Console active" : "Bonsoir, Session active";
+    const name = localStorage.getItem(USER_KEY) || "";
+    const nameSuffix = name ? ` ${name}` : "";
+    
+    let baseGreeting = "Bonjour";
+    if (h < 6) baseGreeting = "Bonne nuit";
+    else if (h >= 18) baseGreeting = "Bonsoir";
+    
+    document.getElementById("greetingText").textContent = baseGreeting + nameSuffix;
+    
     const options = { weekday: 'long', day: 'numeric', month: 'short' };
     document.getElementById("dateText").textContent = now.toLocaleDateString('fr-FR', options).toUpperCase();
   }
 
-  updateClock(); load(); renderAll();
+  updateClockAndGreeting(); load(); renderAll();
 })();
 </script>
 </body>
